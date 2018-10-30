@@ -37,20 +37,13 @@ require(["ramda", "jquery"], function(_, $) {
       coco: 1305
     };
 
-    const selectedCart = [
-      {
-        price: 10
-      },
-      {
-        price: 45
-      },
-      {
-        price: 67
-      },
-      {
-        price: 1305
-      }
-    ];
+    let selectedCart = _.values(goods).map(price => {
+      return {
+        price: price
+      };
+    });
+
+    const rates = _.prop("rates", response);
 
     const calc = (rates, cart) => {
       const getPrice = _.prop("price");
@@ -60,19 +53,18 @@ require(["ramda", "jquery"], function(_, $) {
       );
 
       const multiplyOnCartSum = _.multiply(getCartSum(cart));
-      const getPricesInCourse = _.compose(
+      const getPricesAtRate = _.compose(
         _.map(multiplyOnCartSum),
         _.values
       );
 
-      return _.zipObj(_.keys(rates), getPricesInCourse(rates));
+      return _.zipObj(_.keys(rates), getPricesAtRate(rates));
     };
-
-    const rates = _.prop("rates", response);
 
     const renderControls = goods => {
       _.map(key => {
         const createGoodButton = createButton(() => {
+          selectedCart = selectedCart.slice();
           selectedCart.push({
             price: goods[key]
           });
@@ -87,7 +79,9 @@ require(["ramda", "jquery"], function(_, $) {
       const list = $("<ul/>");
       _.map(key => {
         list.append(
-          $("<li/>").html("<b>" + key + "</b>" + parseInt(courcesSum[key], 10))
+          $("<li/>").html(
+            "<b>" + key + "</b>" + Math.round(courcesSum[key], 10)
+          )
         );
       }, _.keys(courcesSum));
 

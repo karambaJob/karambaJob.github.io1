@@ -5,19 +5,18 @@ requirejs.config({
   }
 });
 
-require(["ramda", "jquery"], function(_, $) {
-  // Utils
-  const getJSON = _.curry(function(callback, error, url) {
+require(["ramda", "jquery"], (_, $) => {
+  const getJSON = _.curry((callback, error, url) => {
     $.getJSON(url, callback).error(error);
   });
 
-  const createButton = _.curry(function(onClick, text) {
+  const createButton = _.curry((onClick, text) => {
     return $("<button/>")
       .text(text)
       .click(onClick);
   });
 
-  const getApiUrl = function() {
+  const getApiUrl = () => {
     const DEFAULT_RATE = "USD";
     const SYMBOLS = [DEFAULT_RATE, "RUB", "EUR", "JPY", "GBP"];
 
@@ -63,34 +62,35 @@ require(["ramda", "jquery"], function(_, $) {
 
     const renderControls = goods => {
       _.map(key => {
-        const createGoodButton = createButton(() => {
+        const goodButtonOnClick = () => {
           selectedCart = selectedCart.slice();
           selectedCart.push({
             price: goods[key]
           });
 
-          renderSum(calc(rates, selectedCart));
-        });
+          renderSum();
+        };
+
+        const createGoodButton = createButton(goodButtonOnClick);
         $("#controls").append(createGoodButton(key));
       }, _.keys(goods));
     };
 
-    const renderSum = courcesSum => {
+    const renderSum = () => {
+      const ratesSum = calc(rates, selectedCart);
       const list = $("<ul/>");
       _.map(key => {
         list.append(
-          $("<li/>").html(
-            "<b>" + key + "</b>" + Math.round(courcesSum[key], 10)
-          )
+          $("<li/>").html("<b>" + key + "</b>" + Math.round(ratesSum[key], 10))
         );
-      }, _.keys(courcesSum));
+      }, _.keys(ratesSum));
 
       $("#sum").html(list);
     };
 
     const init = () => {
       renderControls(goods);
-      renderSum(calc(rates, selectedCart));
+      renderSum();
       $("#app").show();
     };
 
